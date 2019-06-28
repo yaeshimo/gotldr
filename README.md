@@ -27,6 +27,7 @@ gotldr tar
 Edit or create your tldr pages into user cache directory.
 
 ```sh
+# make `$USER_CACHE_DIR/gotldr/users/gotldr.md` if not exist
 gotldr -edit gotldr
 
 # if want to use vim
