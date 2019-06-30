@@ -27,35 +27,30 @@ func FindPage(candidateDirs []string, name string) (string, error) {
 }
 
 func CacheHome() (string, error) {
-	dir, err := os.UserCacheDir()
+	cd, err := os.UserCacheDir()
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(dir, "gotldr"), nil
+	path := filepath.Join(cd, "gotldr")
+	err = os.MkdirAll(path, 0700)
+	if err != nil {
+		return "", err
+	}
+	return path, nil
 }
 
 // expected location: CacheHome/users/
 func UserPageDir() (string, error) {
-	h, err := CacheHome()
+	ch, err := CacheHome()
 	if err != nil {
 		return "", err
 	}
-	dir := filepath.Join(h, "users")
-	fi, err := os.Stat(dir)
-	if err == nil {
-		if fi.IsDir() {
-			return dir, nil
-		}
-		return "", errors.New("is not directory: " + dir)
+	path := filepath.Join(ch, "users")
+	err = os.MkdirAll(path, 0700)
+	if err != nil {
+		return "", err
 	}
-	if os.IsNotExist(err) {
-		err := os.MkdirAll(dir, 0700)
-		if err != nil {
-			return "", err
-		}
-		return dir, nil
-	}
-	return "", err
+	return path, nil
 }
 
 // TODO: remove this? for treat pages.pt-BR
