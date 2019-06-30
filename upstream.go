@@ -40,7 +40,7 @@ func UpdateUpstreamPages() error {
 		}
 	} else {
 		if fi.IsDir() {
-			cmd = exec.Command("git", "pull", "--depth=1")
+			cmd = exec.Command("git", "pull")
 			cmd.Dir = path
 		} else {
 			return errors.New("is not directory:" + path)
