@@ -99,5 +99,21 @@ func Edit(name string) error {
 	} else if !fi.Mode().IsRegular() {
 		return errors.New("not regular file: " + path)
 	}
-	return cmd.Run()
+
+	err = cmd.Run()
+	if err != nil {
+		return err
+	}
+
+	// validate
+	b, err := ioutil.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	_, err = LazyParsePage(b)
+	if err != nil {
+		return fmt.Errorf("File saved but found syntax errors.\n[Err] %v: %s", err, path)
+	}
+
+	return nil
 }
