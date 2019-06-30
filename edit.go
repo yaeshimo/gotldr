@@ -11,28 +11,6 @@ import (
 	"runtime"
 )
 
-// for template
-func sline(line string) string {
-	return fmt.Sprintf("`%s`", line)
-}
-
-// TODO: consider to use text/template packages
-// from: github.com/tldr-pages/tldr/contributing-guides/style-guide.md
-var template = `# command-name
-
-> Short, snappy description.
-> Preferably one line; two are acceptable if neccesarry.
-> More information: <https://example.com>.
-
-- Example description:
-
-` + sline("command -opt1 -opt2 -arg1 {{arg_value}}") + `
-
-- Example descriptoin:
-
-` + sline("command -opt1 -opt2") + `
-`
-
 // TODO: consider default editors
 var editor = func() string {
 	p := os.Getenv("EDITOR")
@@ -76,7 +54,7 @@ func Edit(name string) error {
 	fi, err := os.Stat(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			err := ioutil.WriteFile(path, []byte(template), 0666)
+			err := ioutil.WriteFile(path, []byte(pageTemplate), 0666)
 			if err != nil {
 				return err
 			}
@@ -86,7 +64,7 @@ func Edit(name string) error {
 				if err != nil {
 					panic(err)
 				}
-				if bytes.Equal(b, []byte(template)) {
+				if bytes.Equal(b, []byte(pageTemplate)) {
 					err := os.Remove(path)
 					if err != nil {
 						panic(err)

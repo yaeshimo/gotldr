@@ -9,6 +9,28 @@ import (
 	"strings"
 )
 
+// for pageTemplate
+func sline(line string) string {
+	return fmt.Sprintf("`%s`", line)
+}
+
+// TODO: consider to use text/template packages
+// from: github.com/tldr-pages/tldr/contributing-guides/style-guide.md
+var pageTemplate = `# command-name
+
+> Short, snappy description.
+> Preferably one line; two are acceptable if neccesarry.
+> More information: <https://example.com>.
+
+- Example description:
+
+` + sline("command -opt1 -opt2 -arg1 {{arg_value}}") + `
+
+- Example descriptoin:
+
+` + sline("command -opt1 -opt2") + `
+`
+
 type Example struct {
 	Desc string
 	Line string
