@@ -30,19 +30,18 @@ Edit or create your tldr pages into user cache directory.
 # make USERCACHEDIR/gotldr/users/gotldr.md if not exist
 gotldr -edit gotldr
 
-# if want to use vim
+# use vim
 EDITOR=vim gotldr -edit gotldr
 
-# if want to use emacs
+# use emacs
 EDITOR=emacs gotldr -edit gotldr
 ```
 
 ## Requirements
 
-User cache directory e.g. (`$XDG_CACHE_HOME/gotldr/` on Linux).
-If not exist then to create by first run.
-
-`git` (if use -update flags)
+- User cache directory e.g. `$XDG_CACHE_HOME/gotldr/` on Linux.
+  If not exist then to create by first run.
+- `git` if use `-update`.
 
 ## Installation
 
