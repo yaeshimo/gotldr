@@ -17,6 +17,7 @@ var editor = func() string {
 	if p != "" {
 		return p
 	}
+
 	var ss []string
 	switch runtime.GOOS {
 	case "linux", "darwin", "freebsd", "netbsd", "openbsd":
@@ -40,17 +41,13 @@ func Edit(name string) error {
 	if editor == "" {
 		return errors.New("editor not specified")
 	}
+
 	ud, err := UserPageDir()
 	if err != nil {
 		return err
 	}
+
 	path := filepath.Join(ud, filepath.Base(name)+".md")
-
-	cmd := exec.Command(editor, path)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	cmd.Stdin = os.Stdin
-
 	fi, err := os.Stat(path)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -78,6 +75,10 @@ func Edit(name string) error {
 		return errors.New("not regular file: " + path)
 	}
 
+	cmd := exec.Command(editor, path)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Stdin = os.Stdin
 	err = cmd.Run()
 	if err != nil {
 		return err
@@ -92,6 +93,5 @@ func Edit(name string) error {
 	if err != nil {
 		return fmt.Errorf("File saved but found syntax errors.\n[Err] %v: %s", err, path)
 	}
-
 	return nil
 }
