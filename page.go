@@ -15,7 +15,7 @@ func sline(line string) string {
 }
 
 // TODO: consider to use text/template packages
-// from: github.com/tldr-pages/tldr/contributing-guides/style-guide.md
+// References: https://github.com/tldr-pages/tldr/contributing-guides/style-guide.md
 var pageTemplate = `# command-name
 
 > Short, snappy description.
@@ -36,7 +36,6 @@ type Example struct {
 	Line string
 }
 
-// too long don't read
 type Page struct {
 	Path string
 

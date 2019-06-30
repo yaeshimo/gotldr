@@ -33,10 +33,18 @@ import (
 
 // TODO: add color for *Pages.String()
 
-// TODO: add -list flags for list tldr pages
+// TODO: add -list for list tldr pages
 
 // TODO: add tests
 // return first founded path to pages
+
+// TODO: add -index for specify priority of candidate directories
+// TODO: add -dirs list candidate directories with index
+
+// TODO: add -rm for remove users pages
+
+// TODO: add -add for add examples to users pages
+// e.g. gotldr -add 'Command Arg1 Arg2' 'Example description'
 
 const usage = `Usage:
   gotldr [Options] COMMAND
