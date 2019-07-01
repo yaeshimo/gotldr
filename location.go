@@ -39,13 +39,13 @@ func CacheHome() (string, error) {
 	return path, nil
 }
 
-// expected location: CacheHome/users/
+// expected location: CacheHome/user/
 func UserPageDir() (string, error) {
 	ch, err := CacheHome()
 	if err != nil {
 		return "", err
 	}
-	path := filepath.Join(ch, "users")
+	path := filepath.Join(ch, "user")
 	err = os.MkdirAll(path, 0700)
 	if err != nil {
 		return "", err
@@ -59,7 +59,7 @@ func UserPageDir() (string, error) {
 var IsValidLang func(lang string) bool = regexp.MustCompile("^[a-z][a-z]$").MatchString
 
 // lang is ISO 639-1 codes
-// always priority the users cache
+// always priority the user cache
 func CandidateCacheDirs(platform, lang string) ([]string, error) {
 	ud, err := UserPageDir()
 	if err != nil {
