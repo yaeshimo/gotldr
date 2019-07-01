@@ -46,20 +46,23 @@ import (
 // TODO: add -add for add examples to users pages
 // e.g. gotldr -add 'Command Arg1 Arg2' 'Example description'
 
-const usage = `Usage:
-  gotldr [Options] COMMAND
+var usage = `Usage:
+  gotldr [Options] [COMMAND]
 
 Options:
-  -help                    Display this message
-  -e, -edit [COMMAND]      Edit your tldr pages with $EDITOR
-  -p, -platform [PLATFORM] Specify target platforms
-  -l, -lang [LANG]         Specify priority languages with ISO 639-1 codes
-  -u, -update              Update or download tldr pages (depend on git)
+  -help                  Display this message
+  -e, -edit COMMAND      Edit your tldr pages with $EDITOR
+  -p, -platform PLATFORM Specify target platforms
+  -l, -lang LANG         Specify priority languages with ISO 639-1 codes
+  -r, -remote URL        Specify upstream URL
+                         (default "` + DefaultUpstream + `")
+  -u, -update            Update or download tldr pages into local
+                         from -remote with git
 
 Examples:
-  $ gotldr -help       # help
-  $ gotldr tar         # show usage of tar
-  $ gotldr -edit rsync # edit or make your tldr pages
+  $ gotldr -help        # help
+  $ gotldr cd           # show usage of ls
+  $ gotldr -edit gotldr # edit or make your tldr pages for gotldr
 `
 
 var usageWriter io.Writer = os.Stderr
