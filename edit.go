@@ -91,7 +91,7 @@ func Edit(name string) error {
 	}
 	_, err = LazyParsePage(b)
 	if err != nil {
-		return fmt.Errorf("File saved but found syntax errors.\n[Err] %v: %s", err, path)
+		return fmt.Errorf("File saved but found syntax errors: %v: %s", err, path)
 	}
 	return nil
 }
