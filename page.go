@@ -49,7 +49,7 @@ type Page struct {
 // parse for {{var}}
 // trim "$" for gotldr vim, emacs, etc...
 func (p *Page) String() string {
-	s := fmt.Sprintf("Usage of %q. Location: %s\n\n", p.Name, p.Path)
+	s := fmt.Sprintf("Usage of %q (Location: %s).\n\n", p.Name, p.Path)
 
 	s += "Description:\n"
 	for _, desc := range p.Descs {
