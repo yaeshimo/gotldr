@@ -71,6 +71,7 @@ var opt struct {
 	edit     bool
 	platform string
 	lang     string
+	remote   string
 	update   bool
 }
 
@@ -108,6 +109,8 @@ func init() {
 	flag.StringVar(&opt.platform, "p", defp, "Alias of -platform")
 	flag.StringVar(&opt.lang, "lang", deflang, "Set target language with ISO 639-1 codes")
 	flag.StringVar(&opt.lang, "l", deflang, "Alias of -lang")
+	flag.StringVar(&opt.remote, "remote", "", `Specify upstream URL (default "`+DefaultUpstream+`")`)
+	flag.StringVar(&opt.remote, "r", "", "Alias of -remote")
 	flag.BoolVar(&opt.update, "update", false, "Update pages")
 	flag.BoolVar(&opt.update, "u", false, "Alias of -update")
 
@@ -121,22 +124,24 @@ func run() error {
 		flag.Usage()
 		return nil
 	}
-	switch flag.NArg() {
-	case 1:
-		// pass
-	case 0:
-		if opt.update {
-			if flag.NFlag() != 1 {
-				flag.Usage()
-				return errors.New("too many specified flags")
+
+	if opt.update {
+		switch flag.NFlag() {
+		case 1:
+			// update default remote
+		case 2:
+			if opt.remote != "" {
+				SetUpstream(opt.remote)
+				break
 			}
-			return UpdateUpstreamPages()
+			fallthrough
+		default:
+			return errors.New("too many specified flags")
 		}
-		flag.Usage()
-		return errors.New("command not specified")
-	default:
-		flag.Usage()
-		return errors.New("unexpected arguments: " + strings.Join(flag.Args(), " "))
+		if flag.NArg() != 0 {
+			return errors.New("unexpected arguments: " + strings.Join(flag.Args()[1:], " "))
+		}
+		return UpdateUpstreamPages()
 	}
 
 	if opt.edit {

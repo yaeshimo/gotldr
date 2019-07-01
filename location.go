@@ -74,7 +74,7 @@ func CandidateCacheDirs(platform, lang string) ([]string, error) {
 	platform = filepath.Base(platform)
 
 	// upstream's cache
-	upd, err := UpstreamCacheDir()
+	upd, err := UpstreamLocalRepo()
 	if err != nil {
 		return nil, err
 	}
