@@ -146,12 +146,28 @@ func run() error {
 
 	if opt.edit {
 		if flag.NFlag() != 1 {
-			flag.Usage()
 			return errors.New("too many specified flags")
+		}
+		switch flag.NArg() {
+		case 0:
+			return errors.New("command name not specified")
+		case 1:
+			// pass
+		default:
+			return errors.New("unexpected arguments: " + strings.Join(flag.Args()[1:], " "))
 		}
 		return Edit(filepath.Base(flag.Arg(0)))
 	}
 
+	// display pages
+	switch flag.NArg() {
+	case 0:
+		return errors.New("command name not specified")
+	case 1:
+		// pass
+	default:
+		return errors.New("unexpected arguments: " + strings.Join(flag.Args(), " "))
+	}
 	dirs, err := CandidateCacheDirs(opt.platform, opt.lang)
 	if err != nil {
 		return err
