@@ -33,15 +33,10 @@ import (
 // 3. if template not modified then not save
 // 4. if template modified then save with verification
 
-// TODO: add color for *Pages.String()
-
 // TODO: add -list for list tldr pages
 
 // TODO: add tests
 // return first founded path to pages
-
-// TODO: add -index for specify priority of candidate directories
-// TODO: add -dirs list candidate directories with index
 
 // TODO: add -rm for remove users pages
 
@@ -62,6 +57,7 @@ Options:
                          from -remote with git
   -nocolor               Disable color output
   -dirs                  Display candidate directories with index
+  -index INDEX           Specify pages directory with index
 
 Examples:
   $ gotldr -help        # help
@@ -82,6 +78,7 @@ var opt struct {
 	update   bool
 	nocolor  bool
 	dirs     bool
+	index    int
 }
 
 func init() {
@@ -124,6 +121,7 @@ func init() {
 	flag.BoolVar(&opt.update, "u", false, "Alias of -update")
 	flag.BoolVar(&opt.nocolor, "nocolor", false, "Disable color output")
 	flag.BoolVar(&opt.dirs, "dirs", false, "Display candidate directories")
+	flag.IntVar(&opt.index, "index", -1, "Specify pages directory with index")
 
 	flag.Usage = printUsage
 }
@@ -173,6 +171,12 @@ func run() error {
 	dirs, err := CandidateCacheDirs(opt.platform, opt.lang)
 	if err != nil {
 		return err
+	}
+	if opt.index >= 0 {
+		if opt.index >= len(dirs) {
+			return errors.New("index out of bounds")
+		}
+		dirs = []string{dirs[opt.index]}
 	}
 
 	if opt.dirs {
