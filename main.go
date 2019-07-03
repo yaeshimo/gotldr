@@ -61,6 +61,7 @@ Options:
   -u, -update            Update or download tldr pages into local
                          from -remote with git
   -nocolor               Disable color output
+  -dirs                  Display candidate directories with index
 
 Examples:
   $ gotldr -help        # help
@@ -80,6 +81,7 @@ var opt struct {
 	remote   string
 	update   bool
 	nocolor  bool
+	dirs     bool
 }
 
 func init() {
@@ -121,6 +123,7 @@ func init() {
 	flag.BoolVar(&opt.update, "update", false, "Update pages")
 	flag.BoolVar(&opt.update, "u", false, "Alias of -update")
 	flag.BoolVar(&opt.nocolor, "nocolor", false, "Disable color output")
+	flag.BoolVar(&opt.dirs, "dirs", false, "Display candidate directories")
 
 	flag.Usage = printUsage
 }
@@ -167,7 +170,21 @@ func run() error {
 		return Edit(filepath.Base(flag.Arg(0)))
 	}
 
-	// pages
+	dirs, err := CandidateCacheDirs(opt.platform, opt.lang)
+	if err != nil {
+		return err
+	}
+
+	if opt.dirs {
+		msg := fmt.Sprintf("[Index]\t[Directory]\n")
+		for i, d := range dirs {
+			msg += fmt.Sprintf("%4d\t%q\n", i, d)
+		}
+		_, err = fmt.Println(msg)
+		return err
+	}
+
+	// read page
 	switch flag.NArg() {
 	case 0:
 		return errors.New("command name not specified")
@@ -175,10 +192,6 @@ func run() error {
 		// pass
 	default:
 		return errors.New("unexpected arguments: " + strings.Join(flag.Args(), " "))
-	}
-	dirs, err := CandidateCacheDirs(opt.platform, opt.lang)
-	if err != nil {
-		return err
 	}
 	path, err := FindPage(dirs, flag.Arg(0))
 	if err != nil {
