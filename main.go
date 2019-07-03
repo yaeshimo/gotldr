@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"github.com/mattn/go-colorable"
 )
 
 // Done:
@@ -58,6 +60,7 @@ Options:
                          (default "` + DefaultUpstream + `")
   -u, -update            Update or download tldr pages into local
                          from -remote with git
+  -nocolor               Disable color output
 
 Examples:
   $ gotldr -help        # help
@@ -76,6 +79,7 @@ var opt struct {
 	lang     string
 	remote   string
 	update   bool
+	nocolor  bool
 }
 
 func init() {
@@ -116,6 +120,7 @@ func init() {
 	flag.StringVar(&opt.remote, "r", "", "Alias of -remote")
 	flag.BoolVar(&opt.update, "update", false, "Update pages")
 	flag.BoolVar(&opt.update, "u", false, "Alias of -update")
+	flag.BoolVar(&opt.nocolor, "nocolor", false, "Disable color output")
 
 	flag.Usage = printUsage
 }
@@ -162,7 +167,7 @@ func run() error {
 		return Edit(filepath.Base(flag.Arg(0)))
 	}
 
-	// display pages
+	// pages
 	switch flag.NArg() {
 	case 0:
 		return errors.New("command name not specified")
@@ -183,7 +188,14 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	_, err = fmt.Print(page)
+
+	var stdout io.Writer = os.Stdout
+	if opt.nocolor {
+		stdout = colorable.NewNonColorable(stdout)
+	} else {
+		stdout = colorable.NewColorableStdout()
+	}
+	_, err = fmt.Fprint(stdout, page.Wrap())
 	return err
 }
 

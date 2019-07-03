@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"regexp"
 	"strings"
 )
 
@@ -31,6 +32,14 @@ var pageTemplate = `# command-name
 ` + sline("command -opt1 -opt2") + `
 `
 
+const (
+	reset = "\x1b[0m"
+	bold  = "\x1b[1m"
+	under = "\x1b[4m"
+	red   = "\x1b[31m"
+	green = "\x1b[32m"
+)
+
 type Example struct {
 	Desc string
 	Line string
@@ -44,12 +53,27 @@ type Page struct {
 	Examples []*Example
 }
 
-// TODO: fix print style
-// add color
-// parse for {{var}}
-// trim "$" for gotldr vim, emacs, etc...
+var matchVariable = regexp.MustCompile("{{([^(}})]*)}}")
+
+// wrap with ANSI colors
+func (p *Page) Wrap() *Page {
+	examples := make([]*Example, len(p.Examples))
+	for i, eg := range p.Examples {
+		examples[i] = &Example{
+			Desc: green + eg.Desc + reset,
+			Line: matchVariable.ReplaceAllString(eg.Line, bold+"$1"+reset),
+		}
+	}
+	return &Page{
+		Path:     p.Path,
+		Name:     p.Name,
+		Descs:    p.Descs,
+		Examples: examples,
+	}
+}
+
 func (p *Page) String() string {
-	s := fmt.Sprintf("Usage of %q (Location: %s).\n\n", p.Name, p.Path)
+	s := fmt.Sprintf("Usage of %s (Location: %s).\n\n", p.Name, p.Path)
 
 	s += "Description:\n"
 	for _, desc := range p.Descs {
@@ -60,7 +84,7 @@ func (p *Page) String() string {
 	s += "Examples:\n"
 	for _, eg := range p.Examples {
 		s += fmt.Sprintf("\t%s\n", eg.Desc)
-		s += fmt.Sprintf("\t$ %s\n", eg.Line)
+		s += fmt.Sprintf("\t  %s\n", eg.Line)
 		s += "\n"
 	}
 	return s
