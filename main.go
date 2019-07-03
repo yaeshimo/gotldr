@@ -54,9 +54,9 @@ Options:
   -r, -remote URL        Specify upstream URL
                          (default "` + DefaultUpstream + `")
   -u, -update            Update or download tldr pages into local
-                         from -remote with git
+                         from -remote URL with git
   -nocolor               Disable color output
-  -dirs                  Display candidate directories with index
+  -dirs                  Display current candidate directories with index
   -index INDEX           Specify pages directory with index
 
 Examples:
