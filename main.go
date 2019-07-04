@@ -59,12 +59,16 @@ Options:
                          from -remote URL with git
   -nocolor               Disable color output
   -dirs                  Display current candidate directories with index
-  -index INDEX           Specify pages directory with index
+  -index INDEX           Specify pages directory by index
 
 Examples:
   $ gotldr -help        # help
-  $ gotldr cd           # show usage of ls
-  $ gotldr -edit gotldr # edit or make your tldr pages for gotldr
+  $ gotldr cd           # show usage of cd
+  $ gotldr -edit gotldr # edit or make your own tldr pages
+
+  # change the upstream
+  $ alias='gotldr -remote="https://gitlab.com/USER/REPO.git"'
+  $ gotldr -update
 `
 
 var usageWriter io.Writer = os.Stderr
