@@ -73,7 +73,7 @@ func printUsage() { fmt.Fprintln(usageWriter, usage) }
 
 var opt struct {
 	help     bool
-	edit     bool
+	edit     string
 	platform string
 	lang     string
 	remote   string
@@ -111,8 +111,8 @@ func init() {
 	}
 
 	flag.BoolVar(&opt.help, "help", false, "Display this message")
-	flag.BoolVar(&opt.edit, "edit", false, "Edit users tldr pages")
-	flag.BoolVar(&opt.edit, "e", false, "Alias of -edit")
+	flag.StringVar(&opt.edit, "edit", "", "Edit users tldr pages")
+	flag.StringVar(&opt.edit, "e", "", "Alias of -edit")
 	flag.StringVar(&opt.platform, "platform", defp, "Set target platforms")
 	flag.StringVar(&opt.platform, "p", defp, "Alias of -platform")
 	flag.StringVar(&opt.lang, "lang", deflang, "Set target language with ISO 639-1 codes")
@@ -143,19 +143,14 @@ func run() error {
 		return UpdateUpstreamPages(opt.remote)
 	}
 
-	if opt.edit {
+	if opt.edit != "" {
 		if flag.NFlag() != 1 {
 			return errors.New("too many specified flags")
 		}
-		switch flag.NArg() {
-		case 0:
-			return errors.New("command name not specified")
-		case 1:
-			// pass
-		default:
-			return errors.New("unexpected arguments: " + strings.Join(flag.Args()[1:], " "))
+		if flag.NArg() != 0 {
+			return errors.New("unexpected arguments: " + strings.Join(flag.Args(), " "))
 		}
-		return Edit(filepath.Base(flag.Arg(0)))
+		return Edit(filepath.Base(opt.edit))
 	}
 
 	dirs, err := CandidateCacheDirs(opt.remote, opt.platform, opt.lang)
