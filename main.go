@@ -43,6 +43,8 @@ import (
 // TODO: add -add for add examples to users pages
 // e.g. gotldr -add 'Command Arg1 Arg2' 'Example description'
 
+const DefaultUpstream = "https://github.com/tldr-pages/tldr.git"
+
 var usage = `Usage:
   gotldr [Options] [COMMAND]
 
@@ -115,8 +117,8 @@ func init() {
 	flag.StringVar(&opt.platform, "p", defp, "Alias of -platform")
 	flag.StringVar(&opt.lang, "lang", deflang, "Set target language with ISO 639-1 codes")
 	flag.StringVar(&opt.lang, "l", deflang, "Alias of -lang")
-	flag.StringVar(&opt.remote, "remote", "", `Specify upstream URL (default "`+DefaultUpstream+`")`)
-	flag.StringVar(&opt.remote, "r", "", "Alias of -remote")
+	flag.StringVar(&opt.remote, "remote", DefaultUpstream, `Specify upstream URL`)
+	flag.StringVar(&opt.remote, "r", DefaultUpstream, "Alias of -remote")
 	flag.BoolVar(&opt.update, "update", false, "Update pages")
 	flag.BoolVar(&opt.update, "u", false, "Alias of -update")
 	flag.BoolVar(&opt.nocolor, "nocolor", false, "Disable color output")
@@ -135,22 +137,10 @@ func run() error {
 	}
 
 	if opt.update {
-		switch flag.NFlag() {
-		case 1:
-			// update default remote
-		case 2:
-			if opt.remote != "" {
-				SetUpstream(opt.remote)
-				break
-			}
-			fallthrough
-		default:
-			return errors.New("too many specified flags")
-		}
 		if flag.NArg() != 0 {
 			return errors.New("unexpected arguments: " + strings.Join(flag.Args()[1:], " "))
 		}
-		return UpdateUpstreamPages()
+		return UpdateUpstreamPages(opt.remote)
 	}
 
 	if opt.edit {
@@ -168,7 +158,7 @@ func run() error {
 		return Edit(filepath.Base(flag.Arg(0)))
 	}
 
-	dirs, err := CandidateCacheDirs(opt.platform, opt.lang)
+	dirs, err := CandidateCacheDirs(opt.remote, opt.platform, opt.lang)
 	if err != nil {
 		return err
 	}
@@ -212,6 +202,7 @@ func run() error {
 	} else {
 		stdout = colorable.NewColorableStdout()
 	}
+
 	_, err = fmt.Fprint(stdout, page.Wrap())
 	return err
 }

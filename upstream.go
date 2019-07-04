@@ -5,9 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strings"
-	"sync"
 )
 
 // depend on git
@@ -15,42 +13,9 @@ import (
 // expected pages cache location:
 // ~/.cache/gotldr/repo/{pages,pages.??}/PLATFORM/COMMAND.md
 
-const DefaultUpstream = "https://github.com/tldr-pages/tldr.git"
-
-var (
-	mux      sync.Mutex
-	upstream = DefaultUpstream
-)
-
-func SetUpstream(url string) {
-	mux.Lock()
-	upstream = url
-	mux.Unlock()
-}
-func Upstream() string {
-	mux.Lock()
-	defer mux.Unlock()
-	return upstream
-}
-
-// expected location: ~/.cache/gotldr/repo/REPO/
-func UpstreamLocalRepo() (string, error) {
-	path, err := CacheHome()
-	if err != nil {
-		return "", err
-	}
-	path = filepath.Join(path, "repo")
-	err = os.MkdirAll(path, 0700)
-	if err != nil {
-		return "", err
-	}
-	base := strings.TrimSuffix(filepath.Base(Upstream()), ".git")
-	return filepath.Join(path, base), nil
-}
-
-func getRemote(repo string) (string, error) {
+func getRemote(localRepo string) (string, error) {
 	c := exec.Command("git", "remote", "get-url", "origin")
-	c.Dir = repo
+	c.Dir = localRepo
 	b, err := c.CombinedOutput()
 	if err != nil {
 		return "", err
@@ -59,8 +24,8 @@ func getRemote(repo string) (string, error) {
 }
 
 // clone or pull
-func UpdateUpstreamPages() error {
-	path, err := UpstreamLocalRepo()
+func UpdateUpstreamPages(url string) error {
+	path, err := UpstreamDir(url)
 	if err != nil {
 		return err
 	}
@@ -69,7 +34,7 @@ func UpdateUpstreamPages() error {
 	fi, err := os.Stat(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			cmd = exec.Command("git", "clone", "--depth=1", "--", upstream, path)
+			cmd = exec.Command("git", "clone", "--depth=1", "--", url, path)
 		} else {
 			return err
 		}
@@ -80,7 +45,7 @@ func UpdateUpstreamPages() error {
 			if err != nil {
 				return err
 			}
-			if Upstream() != remote {
+			if url != remote {
 				msg := "Specified repository is already exist and different remote url:\n"
 				msg += fmt.Sprintf("\tPath  : %s\n", path)
 				msg += fmt.Sprintf("\tRemote: %s\n", remote)
@@ -97,8 +62,9 @@ func UpdateUpstreamPages() error {
 	cmd.Stdin = os.Stdin
 
 	// pre messages
-	msg := fmt.Sprintf("Work directory: %q\n", cmd.Dir)
-	msg += fmt.Sprintf("Run: %q\n", cmd.Args)
+	msg := fmt.Sprintf("directory: %s\n", cmd.Dir)
+	msg += fmt.Sprintf("rmote: %s\n", url)
+	msg += fmt.Sprintf("run: %q\n", cmd.Args)
 	msg += "\n"
 	_, err = fmt.Print(msg)
 	if err != nil {
