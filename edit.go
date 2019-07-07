@@ -1,9 +1,7 @@
 package main
 
 import (
-	"bytes"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -11,7 +9,6 @@ import (
 	"runtime"
 )
 
-// TODO: consider default editors
 var editor = func() string {
 	p := os.Getenv("EDITOR")
 	if p != "" {
@@ -25,7 +22,7 @@ var editor = func() string {
 	case "windows":
 		ss = []string{"vim", "emacs", "notepad"}
 	default:
-		// TODO: treat other platforms
+		// treat other platforms?
 	}
 	for _, s := range ss {
 		p, err := exec.LookPath(s)
@@ -36,46 +33,43 @@ var editor = func() string {
 	return ""
 }()
 
-// TODO: validate edited pages and print recommended messages
 func Edit(name string) error {
 	if editor == "" {
 		return errors.New("editor not specified")
 	}
-
 	ud, err := UserPageDir()
 	if err != nil {
 		return err
 	}
+	base := filepath.Base(name) + ".md"
+	path := filepath.Join(ud, base)
 
-	path := filepath.Join(ud, filepath.Base(name)+".md")
-	fi, err := os.Stat(path)
+	// make temp
+	tmp, err := ioutil.TempFile("", "*_"+base)
+	if err != nil {
+		return err
+	}
+	defer os.Remove(tmp.Name())
+	b, err := ioutil.ReadFile(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			err := ioutil.WriteFile(path, []byte(pageTemplate), 0666)
+			_, err = tmp.WriteString(pageTemplate)
 			if err != nil {
 				return err
 			}
-			// remove new pages if not changed
-			defer func() {
-				b, err := ioutil.ReadFile(path)
-				if err != nil {
-					panic(err)
-				}
-				if bytes.Equal(b, []byte(pageTemplate)) {
-					err := os.Remove(path)
-					if err != nil {
-						panic(err)
-					}
-				}
-			}()
+			// pass
 		} else {
 			return err
 		}
-	} else if !fi.Mode().IsRegular() {
-		return errors.New("not regular file: " + path)
+	} else {
+		_, err = tmp.Write(b)
+		if err != nil {
+			return err
+		}
 	}
 
-	cmd := exec.Command(editor, path)
+	// edit temp
+	cmd := exec.Command(editor, tmp.Name())
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
@@ -84,14 +78,15 @@ func Edit(name string) error {
 		return err
 	}
 
-	// validate
-	b, err := ioutil.ReadFile(path)
+	// valdate
+	p, err := ReadPage(tmp.Name())
 	if err != nil {
 		return err
 	}
-	_, err = LazyParsePage(b)
-	if err != nil {
-		return fmt.Errorf("File saved but found syntax errors: %v: %s", err, path)
+	if pageTemplate == string(p.Raw()) {
+		return errors.New("page not changed")
 	}
-	return nil
+
+	// write page
+	return ioutil.WriteFile(path, p.Raw(), 0600)
 }

@@ -47,11 +47,14 @@ type Example struct {
 
 type Page struct {
 	Path string
+	raw  []byte
 
 	Name     string
 	Descs    []string
 	Examples []*Example
 }
+
+func (p *Page) Raw() []byte { return p.raw }
 
 var matchVariable = regexp.MustCompile("{{([^(}})]*)}}")
 
@@ -92,7 +95,7 @@ func (p *Page) String() string {
 
 // TODO: add tests
 func LazyParsePage(b []byte) (*Page, error) {
-	page := new(Page)
+	page := &Page{raw: b}
 	ss := strings.SplitN(string(bytes.TrimSpace(b)), "\n\n", 3)
 	if len(ss) != 3 {
 		return nil, errors.New("can not split to 3 blocks: Name, Desc and Examples")
