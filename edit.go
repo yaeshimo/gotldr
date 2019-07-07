@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"errors"
 	"io/ioutil"
 	"os"
@@ -50,22 +51,19 @@ func Edit(name string) error {
 		return err
 	}
 	defer os.Remove(tmp.Name())
-	b, err := ioutil.ReadFile(path)
+	var origin []byte
+	origin, err = ioutil.ReadFile(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			_, err = tmp.WriteString(pageTemplate)
-			if err != nil {
-				return err
-			}
+			origin = []byte(pageTemplate)
 			// pass
 		} else {
 			return err
 		}
-	} else {
-		_, err = tmp.Write(b)
-		if err != nil {
-			return err
-		}
+	}
+	_, err = tmp.Write(origin)
+	if err != nil {
+		return err
 	}
 
 	// edit temp
@@ -83,7 +81,7 @@ func Edit(name string) error {
 	if err != nil {
 		return err
 	}
-	if pageTemplate == string(p.Raw()) {
+	if bytes.Equal(origin, p.Raw()) {
 		return errors.New("page not changed")
 	}
 
