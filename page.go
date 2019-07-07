@@ -94,6 +94,15 @@ func (p *Page) String() string {
 	return s
 }
 
+type ParseError struct {
+	path string
+	err  error
+}
+
+func (pe *ParseError) Error() string {
+	return fmt.Sprintf("parse error:%s:%s", pe.err.Error(), pe.path)
+}
+
 // TODO: add tests
 func LazyParsePage(b []byte) (*Page, error) {
 	page := &Page{raw: b}
@@ -119,7 +128,7 @@ func LazyParsePage(b []byte) (*Page, error) {
 
 	// page.Examples
 	sc := bufio.NewScanner(strings.NewReader(ss[2]))
-	egn := 0
+	var eg *Example
 	// for - Desc...
 	for sc.Scan() {
 		text := strings.TrimSpace(sc.Text())
@@ -130,8 +139,7 @@ func LazyParsePage(b []byte) (*Page, error) {
 			return nil, errors.New("invalid command descriptins")
 		}
 		text = strings.TrimSpace(strings.TrimSuffix(strings.TrimPrefix(text, "- "), ":"))
-		eg := &Example{Desc: text}
-		egn++
+		eg = &Example{Desc: text}
 		// for `cmd arg...`
 		for sc.Scan() {
 			text := strings.TrimSpace(sc.Text())
@@ -142,7 +150,6 @@ func LazyParsePage(b []byte) (*Page, error) {
 				return nil, errors.New("invalid examples")
 			}
 			eg.Line = strings.TrimSuffix(strings.TrimPrefix(text, "`"), "`")
-			egn++
 			page.Examples = append(page.Examples, eg)
 			break
 		}
@@ -150,8 +157,8 @@ func LazyParsePage(b []byte) (*Page, error) {
 	if err := sc.Err(); err != nil {
 		return nil, err
 	}
-	if egn%2 != 0 {
-		return nil, errors.New("not enough examples")
+	if eg != nil && eg.Line == "" {
+		return nil, errors.New("not found command examples")
 	}
 
 	return page, nil
@@ -164,7 +171,7 @@ func ReadPage(path string) (*Page, error) {
 	}
 	page, err := LazyParsePage(b)
 	if err != nil {
-		return nil, fmt.Errorf("%s: %q", err.Error(), path)
+		return nil, &ParseError{path: path, err: err}
 	}
 	page.path = path
 	return page, nil
