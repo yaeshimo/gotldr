@@ -2,7 +2,7 @@
 
 tldr client.
 
-Upstream tldr-pages: <https://github.com/tldr-pages/tldr/>.
+Ref: <https://github.com/tldr-pages/tldr/>
 
 ## Usage
 
@@ -35,6 +35,13 @@ EDITOR=vim gotldr -edit gotldr
 
 # use emacs
 EDITOR=emacs gotldr -edit gotldr
+```
+
+Specify page repositories.
+
+```sh
+alias gotldr='gotldr -remote "https://gitlab.com/USER/REPO.git"'
+gotldr -update
 ```
 
 ## Requirements
