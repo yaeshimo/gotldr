@@ -13,35 +13,12 @@ import (
 	"github.com/mattn/go-colorable"
 )
 
-// Done:
-// show tldr
-// 1. make candidatedirs with PLATFORM, (LANGUAGES or LANG)
-// 2. search command pages from candidates
-// 3. output tldr
-
-// Done:
-// update tldr
-// 1. git clone from upstream to cache directory
-// note: that expected CACHEDIR/tldr/HOST/REPO/{pages,pages.??}/COMMAND.md
-
-// Done:
-// edit tldr for users
-// note: pages location is CACHEDIR/tldr/user/{pages,pages.??}/COMMAND.md
-// respect $EDITOR
-// 1. if exist specify pages then to edit
-// 2. if not exist then make template
-// 3. if template not modified then not save
-// 4. if template modified then save with verification
-
-// TODO: add -list for list tldr pages
-
-// TODO: add tests
-// return first founded path to pages
-
-// TODO: add -rm for remove users pages
-
-// TODO: add -add for add examples to users pages
-// e.g. gotldr -add 'Command Arg1 Arg2' 'Example description'
+// TODO:
+// - add -list for list tldr pages
+// - add tests
+// - add -rm for remove users pages
+// - add -add for add examples to users pages
+//   e.g. gotldr -add 'Command Arg1 Arg2' 'Example description'
 
 const DefaultUpstream = "https://github.com/tldr-pages/tldr.git"
 
