@@ -46,7 +46,7 @@ type Example struct {
 }
 
 type Page struct {
-	Path string
+	path string
 	raw  []byte
 
 	Name     string
@@ -68,7 +68,7 @@ func (p *Page) Wrap() *Page {
 		}
 	}
 	return &Page{
-		Path:     p.Path,
+		path:     p.path,
 		Name:     p.Name,
 		Descs:    p.Descs,
 		Examples: examples,
@@ -76,7 +76,8 @@ func (p *Page) Wrap() *Page {
 }
 
 func (p *Page) String() string {
-	s := fmt.Sprintf("Usage of %s (Location: %s).\n\n", p.Name, p.Path)
+	s := fmt.Sprintf("Usage of %s:\n", p.Name)
+	s += fmt.Sprintf("\tLocation: %s\n\n", p.path)
 
 	s += "Description:\n"
 	for _, desc := range p.Descs {
@@ -98,7 +99,7 @@ func LazyParsePage(b []byte) (*Page, error) {
 	page := &Page{raw: b}
 	ss := strings.SplitN(string(bytes.TrimSpace(b)), "\n\n", 3)
 	if len(ss) != 3 {
-		return nil, errors.New("can not split to 3 blocks: Name, Desc and Examples")
+		return nil, errors.New("can not split to 3 contexts")
 	}
 
 	// page.Name
@@ -110,7 +111,7 @@ func LazyParsePage(b []byte) (*Page, error) {
 	// page.Descs
 	for _, s := range strings.Split(ss[1], "\n") {
 		if !strings.HasPrefix(s, "> ") {
-			return nil, errors.New("not foudn prefix \"> \"")
+			return nil, errors.New("not found prefix \"> \"")
 		}
 		s = strings.TrimSpace(strings.TrimPrefix(s, "> "))
 		page.Descs = append(page.Descs, s)
@@ -126,7 +127,7 @@ func LazyParsePage(b []byte) (*Page, error) {
 			continue
 		}
 		if !strings.HasPrefix(text, "- ") || !strings.HasSuffix(text, ":") {
-			return nil, errors.New("invalid command descriptin")
+			return nil, errors.New("invalid command descriptins")
 		}
 		text = strings.TrimSpace(strings.TrimSuffix(strings.TrimPrefix(text, "- "), ":"))
 		eg := &Example{Desc: text}
@@ -138,7 +139,7 @@ func LazyParsePage(b []byte) (*Page, error) {
 				continue
 			}
 			if !strings.HasPrefix(text, "`") || !strings.HasSuffix(text, "`") {
-				return nil, errors.New("invalid example of command lines")
+				return nil, errors.New("invalid examples")
 			}
 			eg.Line = strings.TrimSuffix(strings.TrimPrefix(text, "`"), "`")
 			egn++
@@ -165,6 +166,6 @@ func ReadPage(path string) (*Page, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%s: %q", err.Error(), path)
 	}
-	page.Path = path
+	page.path = path
 	return page, nil
 }
