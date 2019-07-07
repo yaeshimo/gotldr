@@ -53,7 +53,7 @@ Options:
   -e, -edit COMMAND      Edit your tldr pages with $EDITOR
   -p, -platform PLATFORM Specify target platforms
   -l, -lang LANG         Specify priority languages with ISO 639-1 codes
-  -r, -remote URL        Specify upstream URL
+  -r, -remote REPOSITORY Specify page repositories
                          (default "` + DefaultUpstream + `")
   -u, -update            Update or download tldr pages into local
                          from -remote URL with git
@@ -121,7 +121,7 @@ func init() {
 	flag.StringVar(&opt.platform, "p", defp, "Alias of -platform")
 	flag.StringVar(&opt.lang, "lang", deflang, "Set target language with ISO 639-1 codes")
 	flag.StringVar(&opt.lang, "l", deflang, "Alias of -lang")
-	flag.StringVar(&opt.remote, "remote", DefaultUpstream, `Specify upstream URL`)
+	flag.StringVar(&opt.remote, "remote", DefaultUpstream, `Specify page repositories`)
 	flag.StringVar(&opt.remote, "r", DefaultUpstream, "Alias of -remote")
 	flag.BoolVar(&opt.update, "update", false, "Update pages")
 	flag.BoolVar(&opt.update, "u", false, "Alias of -update")
@@ -186,15 +186,12 @@ func run() error {
 	default:
 		return errors.New("unexpected arguments: " + strings.Join(flag.Args(), " "))
 	}
-	path, err := FindPage(dirs, flag.Arg(0))
-	if err != nil {
-		return err
-	}
-	page, err := ReadPage(path)
+	page, err := FindPage(dirs, flag.Arg(0))
 	if err != nil {
 		return err
 	}
 
+	// color
 	var stdout io.Writer = os.Stdout
 	if opt.nocolor {
 		stdout = colorable.NewNonColorable(stdout)

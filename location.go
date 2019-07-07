@@ -8,25 +8,6 @@ import (
 	"strings"
 )
 
-func FindPage(candidateDirs []string, name string) (string, error) {
-	base := filepath.Base(name) + ".md"
-	var path string
-	for _, dir := range candidateDirs {
-		path = filepath.Join(dir, base)
-		fi, err := os.Stat(path)
-		if err != nil {
-			if os.IsNotExist(err) {
-				continue
-			}
-			return "", err
-		}
-		if fi.Mode().IsRegular() {
-			return path, nil
-		}
-	}
-	return "", errors.New("not found pages")
-}
-
 func CacheHome() (string, error) {
 	cd, err := os.UserCacheDir()
 	if err != nil {
@@ -89,13 +70,13 @@ func CandidateCacheDirs(remote, platform, lang string) ([]string, error) {
 	}
 	platform = filepath.Base(platform)
 
-	// upstream's cache
+	// path to cache of upstream
 	upd, err := UpstreamDir(remote)
 	if err != nil {
 		return nil, err
 	}
 
-	// with lang
+	// local
 	if lang != "" {
 		dirs = append(dirs, filepath.Join(upd, "pages."+lang, "common"))
 		if platform != "" {
@@ -103,11 +84,37 @@ func CandidateCacheDirs(remote, platform, lang string) ([]string, error) {
 		}
 	}
 
-	// default english pages
+	// english pages
 	dirs = append(dirs, filepath.Join(upd, "pages", "common"))
 	if platform != "" {
 		dirs = append(dirs, filepath.Join(upd, "pages", platform))
 	}
 
 	return dirs, nil
+}
+
+func FindPage(candidateDirs []string, name string) (*Page, error) {
+	base := filepath.Base(name) + ".md"
+	var path string
+	for _, dir := range candidateDirs {
+		path = filepath.Join(dir, base)
+		fi, err := os.Stat(path)
+		if err != nil {
+			if os.IsNotExist(err) {
+				continue
+			}
+			return nil, err
+		}
+		if fi.Mode().IsRegular() {
+			p, err := ReadPage(path)
+			if err != nil {
+				if os.IsNotExist(err) {
+					continue
+				}
+				return nil, err
+			}
+			return p, nil
+		}
+	}
+	return nil, errors.New("page not found: " + name)
 }
