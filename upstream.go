@@ -10,7 +10,7 @@ import (
 
 // depend on git
 
-// expected pages cache location:
+// expected cache locations:
 // ~/.cache/gotldr/repo/{pages,pages.??}/PLATFORM/COMMAND.md
 
 func getRemote(localRepo string) (string, error) {
@@ -47,8 +47,8 @@ func UpdateUpstreamPages(url string) error {
 			}
 			if url != remote {
 				msg := "Specified repository is already exist and different remote url:\n"
-				msg += fmt.Sprintf("\tPath  : %s\n", path)
-				msg += fmt.Sprintf("\tRemote: %s\n", remote)
+				msg += fmt.Sprintf("\tpath : %s\n", path)
+				msg += fmt.Sprintf("\tremote: %s\n", remote)
 				return errors.New(msg)
 			}
 			cmd = exec.Command("git", "pull")
@@ -62,7 +62,8 @@ func UpdateUpstreamPages(url string) error {
 	cmd.Stdin = os.Stdin
 
 	// pre messages
-	msg := fmt.Sprintf("directory: %s\n", cmd.Dir)
+	var msg string
+	msg += fmt.Sprintf("directory: %s\n", path)
 	msg += fmt.Sprintf("rmote: %s\n", url)
 	msg += fmt.Sprintf("run: %q\n", cmd.Args)
 	msg += "\n"
