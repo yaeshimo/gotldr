@@ -104,7 +104,7 @@ func (pe *ParseError) Error() string {
 }
 
 // TODO: add tests
-func LazyParsePage(b []byte) (*Page, error) {
+func lazyParse(b []byte) (*Page, error) {
 	page := &Page{raw: b}
 	ss := strings.SplitN(string(bytes.TrimSpace(b)), "\n\n", 3)
 	if len(ss) != 3 {
@@ -169,7 +169,7 @@ func ReadPage(path string) (*Page, error) {
 	if err != nil {
 		return nil, err
 	}
-	page, err := LazyParsePage(b)
+	page, err := lazyParse(b)
 	if err != nil {
 		return nil, &ParseError{path: path, err: err}
 	}
